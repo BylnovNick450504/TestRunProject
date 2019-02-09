@@ -110,4 +110,28 @@ public class User extends BaseEntity {
         runRecords.add(record);
         record.setUser(this);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        User user = (User) o;
+
+        if (!getUsername().equals(user.getUsername())) return false;
+        if (!getEmail().equals(user.getEmail())) return false;
+        if (!getName().equals(user.getName())) return false;
+        return getPassword().equals(user.getPassword());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + getUsername().hashCode();
+        result = 31 * result + getEmail().hashCode();
+        result = 31 * result + getName().hashCode();
+        result = 31 * result + getPassword().hashCode();
+        return result;
+    }
 }

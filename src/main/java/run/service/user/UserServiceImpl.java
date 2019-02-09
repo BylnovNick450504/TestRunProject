@@ -1,5 +1,6 @@
 package run.service.user;
 
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import run.client.core.ClientConstants;
+import run.client.security.JwtTokenUtil;
 import run.client.security.custom.JwtUserFactory;
 import run.persistence.user.User;
 import run.persistence.user.role.Role;
@@ -24,12 +27,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final JwtTokenUtil jwtTokenUtil;
 
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           RoleRepository roleRepository,
+                           JwtTokenUtil jwtTokenUtil) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @Override
@@ -61,5 +68,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         } else {
             return JwtUserFactory.create(user);
         }
+    }
+
+    @Override
+    public User getUserByToken(HttpServletRequest request) {
+        String token = request.getHeader(ClientConstants.AUTHORIZATION_HEADER);
+        if (token != null) {
+            String userName = jwtTokenUtil.getUsernameFromToken(token);
+            if (userName != null) {
+                User user = userRepository.findByUsername(userName);
+                if (user != null) {
+                    return user;
+                }
+            }
+        }
+        return null;
     }
 }
