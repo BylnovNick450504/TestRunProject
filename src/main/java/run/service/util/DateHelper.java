@@ -18,6 +18,11 @@ public final class DateHelper {
         return formatter.format(date);
     }
 
+    public static String dateToString(Date date, String pattern) {
+        DateFormat formatter = new SimpleDateFormat(pattern);
+        return formatter.format(date);
+    }
+
     public static Date stringToDate(String dateStr) {
         SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_TIME_FORMAT);
         Date date = new Date();

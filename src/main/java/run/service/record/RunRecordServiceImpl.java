@@ -1,6 +1,9 @@
 package run.service.record;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -12,9 +15,12 @@ import run.persistence.user.RunRecord;
 import run.persistence.user.User;
 import run.service.core.CustomSoloRequest;
 import run.service.core.ResponseStatus;
+import run.service.record.dto.ReportDTO;
 import run.service.record.dto.RunRecordDTO;
 import run.service.user.UserService;
+import run.service.util.Constants;
 import run.service.util.Converter;
+import run.service.util.DateHelper;
 
 @Service
 public class RunRecordServiceImpl implements RunRecordService {
@@ -84,7 +90,7 @@ public class RunRecordServiceImpl implements RunRecordService {
         List<RunRecordDTO> result;
         List<RunRecord> runRecords = runRecordRepository.findAllByUser(owner);
         if (runRecords == null || runRecords.isEmpty()) {
-           result = Collections.emptyList();
+            result = Collections.emptyList();
         } else {
             result = runRecords.stream().map(Converter.toRecordDTO()).collect(Collectors.toList());
         }
@@ -107,7 +113,67 @@ public class RunRecordServiceImpl implements RunRecordService {
     }
 
     @Override
-    public ResponseEntity<?> createReport(HttpServletRequest request, CustomSoloRequest startDate) {
-        return null;
+    public ResponseEntity<?> collectStatistic(HttpServletRequest request, CustomSoloRequest startDate) {
+        Date from = DateHelper.stringToDate(startDate.getDateFrom());
+        Date upBounder = DateHelper.stringToDate(startDate.getDateTo());
+        if (from.after(upBounder)) {
+            return ResponseEntity.ok(new ResponseStatus(false, "bad request: wrong input"));
+        }
+        User owner = userService.getUserByToken(request);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(from);
+        int weekNumber = 1;
+        List<ReportDTO> reports = new ArrayList<>();
+        while (true) {
+            calendar.add(Calendar.WEEK_OF_MONTH, 1);
+            Date to = calendar.getTime();
+            if (upBounder.before(to)) {
+                break;
+            }
+            List<RunRecord> runRecords = runRecordRepository.findAllByRunDateBetweenAndUser(from, to, owner);
+
+            ReportDTO reportItem = createReportItem(
+                    createReportName(weekNumber++, to, from),
+                    runRecords);
+            reports.add(reportItem);
+
+            Calendar shift = Calendar.getInstance();
+            shift.setTime(to);
+            shift.add(Calendar.DATE, 1);
+            from = shift.getTime();
+        }
+        return ResponseEntity.ok(reports);
+    }
+
+    private String createReportName(int weekNumber, Date to, Date from) {
+        return String.format("Week %d: (%s / %s)", weekNumber,
+                DateHelper.dateToString(from, Constants.DATE_FORMAT),
+                DateHelper.dateToString(to, Constants.DATE_FORMAT));
+    }
+
+    private ReportDTO createReportItem(String name, List<RunRecord> runRecords) {
+        double totalDistance = 0.0;
+        double averageSpeed = 0.0;
+        double averageTime = 0.0;
+        if (runRecords != null && !runRecords.isEmpty()) {
+            for (RunRecord r : runRecords) {
+                totalDistance += r.getDistance();
+                averageTime += r.getDuration();
+                averageSpeed += r.getDistance() / r.getDuration();
+            }
+            averageTime /= runRecords.size();
+        }
+        return new ReportDTO(name, averageSpeed, averageTime, totalDistance);
+    }
+
+    @Override
+    public ResponseEntity<?> printStatistics(HttpServletRequest request, CustomSoloRequest startDate) {
+        ResponseEntity<?> responseEntity = collectStatistic(request, startDate);
+        List<ReportDTO> reports = (List<ReportDTO>) responseEntity.getBody();
+        if (reports == null || reports.isEmpty()) {
+            return ResponseEntity.ok(new ResponseStatus(false, "bad request: no statistic for that time"));
+        }
+        String result = reports.stream().map(ReportDTO::toString).collect(Collectors.joining());
+        return ResponseEntity.ok(result);
     }
 }

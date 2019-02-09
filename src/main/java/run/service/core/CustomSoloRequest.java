@@ -2,7 +2,8 @@ package run.service.core;
 
 public class CustomSoloRequest {
     private Long id;
-    private String data;
+    private String dateFrom;
+    private String dateTo;
 
     public CustomSoloRequest() {
     }
@@ -19,11 +20,19 @@ public class CustomSoloRequest {
         this.id = id;
     }
 
-    public String getData() {
-        return data;
+    public String getDateFrom() {
+        return dateFrom;
     }
 
-    public void setData(String data) {
-        this.data = data;
+    public void setDateFrom(String dateFrom) {
+        this.dateFrom = dateFrom;
+    }
+
+    public String getDateTo() {
+        return dateTo;
+    }
+
+    public void setDateTo(String dateTo) {
+        this.dateTo = dateTo;
     }
 }

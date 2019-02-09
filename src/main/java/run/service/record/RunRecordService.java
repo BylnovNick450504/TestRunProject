@@ -12,5 +12,6 @@ public interface RunRecordService {
     ResponseEntity<?> getRunRecord(HttpServletRequest request, Long id);
     ResponseEntity<?> getAllRunRecords(HttpServletRequest request);
     ResponseEntity<?> updateRunRecord(HttpServletRequest request, RunRecordDTO runRecordDTO);
-    ResponseEntity<?> createReport(HttpServletRequest request, CustomSoloRequest startDate);
+    ResponseEntity<?> collectStatistic(HttpServletRequest request, CustomSoloRequest startDate);
+    ResponseEntity<?> printStatistics(HttpServletRequest request, CustomSoloRequest startDate);
 }

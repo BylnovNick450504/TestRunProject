@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import run.service.core.CustomSoloRequest;
 import run.service.record.RunRecordService;
 import run.service.record.dto.RunRecordDTO;
 
@@ -44,5 +45,15 @@ public class RunRecordController {
     @RequestMapping(value = "run/record/all", method = RequestMethod.GET)
     public ResponseEntity<?> getAllRunRecords(HttpServletRequest request) {
         return runRecordService.getAllRunRecords(request);
+    }
+
+    @RequestMapping(value = "run/record/report", method = RequestMethod.POST)
+    public ResponseEntity<?> getReport(HttpServletRequest request, @RequestBody CustomSoloRequest dateFrom) {
+        return runRecordService.collectStatistic(request, dateFrom);
+    }
+
+    @RequestMapping(value = "run/record/report/print", method = RequestMethod.POST)
+    public ResponseEntity<?> getPrintReport(HttpServletRequest request, @RequestBody CustomSoloRequest dateFrom) {
+        return runRecordService.printStatistics(request, dateFrom);
     }
 }
