@@ -1,5 +1,6 @@
 package run.persistence.user.role;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
@@ -34,6 +35,7 @@ public class Role extends BaseEntity {
         this.role = role;
     }
 
+    @JsonIgnore
     public List<User> getUsers() {
         return users;
     }

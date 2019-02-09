@@ -1,5 +1,6 @@
 package run.persistence.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -25,6 +26,7 @@ public class RunRecord extends BaseEntity {
     public RunRecord() {
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }

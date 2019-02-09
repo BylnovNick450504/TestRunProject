@@ -2,6 +2,7 @@ package run.service.core;
 
 public class CustomSoloRequest {
     private Long id;
+    private String data;
 
     public CustomSoloRequest() {
     }
@@ -16,5 +17,13 @@ public class CustomSoloRequest {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
     }
 }
