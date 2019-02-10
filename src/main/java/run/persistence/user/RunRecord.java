@@ -8,6 +8,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import run.persistence.core.BaseEntity;
+import run.service.util.DateHelper;
 
 @Entity
 @Table(name = "run_record")
@@ -24,6 +25,13 @@ public class RunRecord extends BaseEntity {
     private Date runDate;
 
     public RunRecord() {
+    }
+
+    public RunRecord(User user, double distance, double duration, String runDateStr) {
+        this.user = user;
+        this.distance = distance;
+        this.duration = duration;
+        this.runDate = DateHelper.stringToDate(runDateStr);
     }
 
     @JsonIgnore

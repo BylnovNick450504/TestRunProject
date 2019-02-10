@@ -113,36 +113,48 @@ public class RunRecordServiceImpl implements RunRecordService {
     }
 
     @Override
-    public ResponseEntity<?> collectStatistic(HttpServletRequest request, CustomSoloRequest startDate) {
-        Date from = DateHelper.stringToDate(startDate.getDateFrom());
-        Date upBounder = DateHelper.stringToDate(startDate.getDateTo());
-        if (from.after(upBounder)) {
-            return ResponseEntity.ok(new ResponseStatus(false, "bad request: wrong input"));
-        }
+    public ResponseEntity<?> collectStatistic(HttpServletRequest request) {
+        return ResponseEntity.ok(createReports(request));
+    }
+
+    private List<ReportDTO> createReports(HttpServletRequest request) {
         User owner = userService.getUserByToken(request);
+        List<RunRecord> records = runRecordRepository.findAllByUserOrderByRunDateAsc(owner);
+        if (records == null || records.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<ReportDTO> reports = new ArrayList<>();
+
+        Date from = new Date(records.get(0).getRunDate().getTime());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(from);
         int weekNumber = 1;
-        List<ReportDTO> reports = new ArrayList<>();
         while (true) {
             calendar.add(Calendar.WEEK_OF_MONTH, 1);
+
             Date to = calendar.getTime();
-            if (upBounder.before(to)) {
+            List<RunRecord> weekRecords = records.stream()
+                    .filter(r -> {
+                        Date runDate = r.getRunDate();
+                        return runDate.before(to) &&
+                                runDate.after(from) ||
+                                to.equals(runDate) ||
+                                from.equals(runDate);
+                    }).collect(Collectors.toList());
+            if (records.get(records.size() - 1).getRunDate().before(to) && weekRecords.isEmpty()) {
                 break;
             }
-            List<RunRecord> runRecords = runRecordRepository.findAllByRunDateBetweenAndUser(from, to, owner);
-
             ReportDTO reportItem = createReportItem(
                     createReportName(weekNumber++, to, from),
-                    runRecords);
+                    weekRecords);
             reports.add(reportItem);
 
             Calendar shift = Calendar.getInstance();
             shift.setTime(to);
-            shift.add(Calendar.DATE, 1);
-            from = shift.getTime();
+            shift.add(Calendar.SECOND, 1);
+            from.setTime(shift.getTime().getTime());
         }
-        return ResponseEntity.ok(reports);
+        return reports;
     }
 
     private String createReportName(int weekNumber, Date to, Date from) {
@@ -167,12 +179,8 @@ public class RunRecordServiceImpl implements RunRecordService {
     }
 
     @Override
-    public ResponseEntity<?> printStatistics(HttpServletRequest request, CustomSoloRequest startDate) {
-        ResponseEntity<?> responseEntity = collectStatistic(request, startDate);
-        List<ReportDTO> reports = (List<ReportDTO>) responseEntity.getBody();
-        if (reports == null || reports.isEmpty()) {
-            return ResponseEntity.ok(new ResponseStatus(false, "bad request: no statistic for that time"));
-        }
+    public ResponseEntity<?> printStatistics(HttpServletRequest request) {
+        List<ReportDTO> reports = createReports(request);
         String result = reports.stream().map(ReportDTO::toString).collect(Collectors.joining());
         return ResponseEntity.ok(result);
     }

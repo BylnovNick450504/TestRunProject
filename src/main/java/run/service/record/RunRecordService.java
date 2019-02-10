@@ -2,7 +2,6 @@ package run.service.record;
 
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import run.service.core.CustomSoloRequest;
 import run.service.record.dto.RunRecordDTO;
 
 public interface RunRecordService {
@@ -12,6 +11,6 @@ public interface RunRecordService {
     ResponseEntity<?> getRunRecord(HttpServletRequest request, Long id);
     ResponseEntity<?> getAllRunRecords(HttpServletRequest request);
     ResponseEntity<?> updateRunRecord(HttpServletRequest request, RunRecordDTO runRecordDTO);
-    ResponseEntity<?> collectStatistic(HttpServletRequest request, CustomSoloRequest startDate);
-    ResponseEntity<?> printStatistics(HttpServletRequest request, CustomSoloRequest startDate);
+    ResponseEntity<?> collectStatistic(HttpServletRequest request);
+    ResponseEntity<?> printStatistics(HttpServletRequest request);
 }

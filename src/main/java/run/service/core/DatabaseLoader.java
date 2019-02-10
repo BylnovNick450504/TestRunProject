@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import run.persistence.user.RunRecord;
 import run.persistence.user.User;
 import run.persistence.user.role.Role;
+import run.service.record.RunRecordRepository;
 import run.service.user.UserRepository;
 import run.service.user.role.RoleRepository;
 
@@ -15,13 +17,16 @@ public class DatabaseLoader implements ApplicationRunner {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RunRecordRepository runRecordRepository;
 
     @Autowired
     public DatabaseLoader(UserRepository userRepository,
-                          RoleRepository roleRepository
+                          RoleRepository roleRepository,
+                          RunRecordRepository runRecordRepository
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.runRecordRepository = runRecordRepository;
     }
 
     @Override
@@ -49,5 +54,22 @@ public class DatabaseLoader implements ApplicationRunner {
         userRepository.save(user4);
         userRepository.save(user5);
         userRepository.save(user6);
+
+        RunRecord runRecord1 = new RunRecord(user1, 1000.0, 1000.0, "2018-02-09 00:00");
+        RunRecord runRecord2 = new RunRecord(user1, 1000.0, 1000.0, "2018-02-10 00:00");
+        RunRecord runRecord3 = new RunRecord(user1, 1000.0, 1000.0, "2018-02-16 00:00");
+        RunRecord runRecord4 = new RunRecord(user1, 1000.0, 1000.0, "2018-02-17 00:00");
+        RunRecord runRecord5 = new RunRecord(user1, 1000.0, 1000.0, "2018-02-23 00:00");
+        RunRecord runRecord6 = new RunRecord(user1, 1000.0, 1000.0, "2018-02-24 00:00");
+        RunRecord runRecord7 = new RunRecord(user1, 1000.0, 1000.0, "2018-02-16 18:00");
+
+        runRecordRepository.save(runRecord1);
+        runRecordRepository.save(runRecord2);
+        runRecordRepository.save(runRecord3);
+        runRecordRepository.save(runRecord4);
+        runRecordRepository.save(runRecord5);
+        runRecordRepository.save(runRecord6);
+        runRecordRepository.save(runRecord7);
+
     }
 }
