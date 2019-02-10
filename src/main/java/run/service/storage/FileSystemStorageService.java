@@ -46,7 +46,7 @@ public class FileSystemStorageService implements StorageService {
                 throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
             }
             String route = rootLocation.resolve(folder).toString();
-            imgName = "run -" + new Date().getTime() + file.getOriginalFilename();
+            imgName = "run" + new Date().getTime() + file.getOriginalFilename();
             // check folder (exist or not)
             makeDir(route);
             Files.copy(file.getInputStream(), rootLocation.resolve(folder + imgName));
